@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post" action="/settings">
+{% if saved %}<div class="card ok">Сохранено. Работающие аккаунты подхватят изменения на следующей проверке.</div>{% endif %}
+<div class="card">
+  <h2 style="margin-top:0">Vision</h2>
+  <div class="grid">
+    <div><label>API-токен (X-Token)</label><input type="password" name="vision_token" value="{{ s.vision_token }}" autocomplete="off">
+      <div class="hint">Vision → Настройки → API.</div></div>
+    <div><label>ID папки</label><input type="text" name="vision_folder_id" value="{{ s.vision_folder_id }}"></div>
+    <div><label>Облачный API</label><input type="text" name="vision_api_url" value="{{ s.vision_api_url }}"></div>
+    <div><label>Локальный API</label><input type="text" name="vision_local_url" value="{{ s.vision_local_url }}">
+      <div class="hint">Работает, когда запущено приложение Vision.</div></div>
+    <div><label>Платформа отпечатка</label>
+      <select name="vision_platform">{% for p in ['windows','macos','linux'] %}<option {% if s.vision_platform == p %}selected{% endif %}>{{ p }}</option>{% endfor %}</select></div>
+    <div><label>Браузер</label><input type="text" name="vision_browser" value="{{ s.vision_browser }}"></div>
+  </div>
+  <label><input type="checkbox" name="vision_stop_on_exit" value="1" {% if s.vision_stop_on_exit == '1' %}checked{% endif %}> Закрывать профиль Vision при остановке бота</label>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">Поведение</h2>
+  <div class="grid">
+    <div><label>Интервал проверки, сек</label><input type="number" name="poll_interval" value="{{ s.poll_interval }}"></div>
+    <div><label>Случайная добавка к интервалу, сек</label><input type="number" name="poll_jitter" value="{{ s.poll_jitter }}"></div>
+    <div><label>Задержка перед ответом: от, сек</label><input type="number" name="reply_delay_min" value="{{ s.reply_delay_min }}"></div>
+    <div><label>до, сек</label><input type="number" name="reply_delay_max" value="{{ s.reply_delay_max }}"></div>
+    <div><label>Скорость набора, мс на символ</label><input type="number" name="typing_delay_ms" value="{{ s.typing_delay_ms }}">
+      <div class="hint">0 — вставлять текст сразу.</div></div>
+    <div><label>Режим ответа</label>
+      <select name="reply_mode">
+        <option value="once" {% if s.reply_mode == 'once' %}selected{% endif %}>Один раз на диалог</option>
+        <option value="every" {% if s.reply_mode == 'every' %}selected{% endif %}>На каждое новое входящее</option>
+      </select></div>
+    <div><label>Способ отправки</label>
+      <select name="send_mode">
+        <option value="ui" {% if s.send_mode == 'ui' %}selected{% endif %}>Через окно диалога (как человек)</option>
+        <option value="api" {% if s.send_mode == 'api' %}selected{% endif %}>Запросом к API сообщений</option>
+      </select></div>
+    <div><label>Обновлять список объявлений, мин</label><input type="number" name="ads_sync_minutes" value="{{ s.ads_sync_minutes }}"></div>
+  </div>
+  <label><input type="checkbox" name="only_as_seller" value="1" {% if s.only_as_seller == '1' %}checked{% endif %}> Отвечать только по нашим объявлениям (диалоги, где мы — продавец)</label>
+  <label><input type="checkbox" name="autostart" value="1" {% if s.autostart == '1' %}checked{% endif %}> Автозапуск включённых аккаунтов при старте панели</label>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">Kleinanzeigen (для тонкой настройки)</h2>
+  <p class="hint">Меняйте, только если сайт поменял адреса или вёрстку.</p>
+  <div class="grid">
+    {% for key in ['ka_inbox_url','ka_conversation_url','ka_gateway_url','ka_my_ads_url','ka_ad_url','ka_reply_textarea_selector','ka_send_button_selector'] %}
+    <div><label><code>{{ key }}</code></label><input type="text" name="{{ key }}" value="{{ s[key] }}"></div>
+    {% endfor %}
+  </div>
+</div>
+<p><button class="primary">Сохранить настройки</button></p>
+</form>
+{% endblock %}

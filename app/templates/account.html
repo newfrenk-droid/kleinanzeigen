@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+{% set f = form or {} %}
+<div class="card">
+  <h2 style="margin-top:0">{{ 'Аккаунт: ' ~ account.name if account and account.id else 'Новый аккаунт' }}</h2>
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  <form method="post" action="/accounts/save">
+    <input type="hidden" name="account_id" value="{{ account.id if account else 0 }}">
+    <label>Название (для себя)</label>
+    <input type="text" name="name" required value="{{ f.name or (account.name if account else '') }}">
+
+    <label>Куки</label>
+    <textarea name="cookies" rows="8" placeholder='[{"name": "...", "value": "...", "domain": ".kleinanzeigen.de", ...}]'>{{ f.cookies_raw or '' }}</textarea>
+    <div class="hint">
+      JSON (экспорт Cookie-Editor / EditThisCookie / Vision), Netscape <code>cookies.txt</code> или строка <code>name=value; name2=value2</code>.
+      {% if account and account.id %}Оставьте пустым, чтобы не менять текущие куки.{% endif %}
+    </div>
+
+    <label>Прокси</label>
+    <input type="text" name="proxy" value="{{ f.proxy if form else (account.proxy if account else '') }}" placeholder="http://user:pass@1.2.3.4:8080">
+    <div class="hint">Форматы: <code>http://user:pass@host:port</code>, <code>socks5://host:port</code>, <code>host:port:user:pass</code>, <code>host:port</code>.</div>
+
+    <label><input type="checkbox" name="enabled" value="1" {% if not account or account.enabled %}checked{% endif %}> Включён (запускается кнопкой «Запустить все» и автозапуском)</label>
+
+    <p class="row"><button class="primary">Сохранить</button> <a class="btn" href="/">Отмена</a></p>
+  </form>
+</div>
+
+{% if account and account.id %}
+<div class="card">
+  <h3 style="margin-top:0">Профиль Vision</h3>
+  <p>ID профиля: <code>{{ account.vision_profile_id or '—' }}</code>, ID прокси: <code>{{ account.vision_proxy_id or '—' }}</code>,
+     userId Kleinanzeigen: <code>{{ account.ka_user_id or '—' }}</code></p>
+  <div class="row">
+    <form class="inline" method="post" action="/accounts/{{ account.id }}/reset-profile"
+          onsubmit="return confirm('Удалить профиль в Vision и создать новый при следующем запуске?')">
+      <button>Пересоздать профиль Vision</button>
+    </form>
+    <form class="inline" method="post" action="/accounts/{{ account.id }}/delete"
+          onsubmit="return confirm('Удалить аккаунт из панели?')">
+      <button class="danger">Удалить аккаунт</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">Объявления аккаунта</h3>
+  <table>
+    <tr><th>ID</th><th>Название</th><th>Цена</th></tr>
+    {% for ad in ads %}
+    <tr><td>{{ ad.ad_id }}</td><td>{% if ad.url %}<a href="{{ ad.url }}" target="_blank" rel="noopener">{{ ad.title }}</a>{% else %}{{ ad.title }}{% endif %}</td><td>{{ ad.price }}</td></tr>
+    {% else %}
+    <tr><td colspan="3" class="muted">Загрузятся после первого запуска.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}
+{% endblock %}

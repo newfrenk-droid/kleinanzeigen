@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2 style="margin-top:0">{{ 'Шаблон: ' ~ item.name if item else 'Новый шаблон' }}</h2>
+  <form method="post" action="/templates/save">
+    <input type="hidden" name="template_id" value="{{ item.id if item else 0 }}">
+    <label>Название</label>
+    <input type="text" name="name" required value="{{ item.name if item else '' }}">
+
+    <label>Текст автоответа</label>
+    <textarea name="text" rows="10" required>{{ item.text if item else '' }}</textarea>
+    <div class="hint">
+      Переменные:
+      {% for key, desc in placeholders.items() %}<code>{{ '{' ~ key ~ '}' }}</code> — {{ desc }}{% if not loop.last %}, {% endif %}{% endfor %}.<br>
+      Несколько вариантов текста разделяйте строкой <code>---</code> — бот будет выбирать случайный.
+    </div>
+
+    <div class="grid">
+      <div>
+        <label>Аккаунт</label>
+        <select name="account_id">
+          <option value="">Все аккаунты</option>
+          {% for a in accounts %}<option value="{{ a.id }}" {% if item and item.account_id == a.id %}selected{% endif %}>{{ a.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Конкретное объявление (ID)</label>
+        <input type="text" name="ad_id" list="ads" value="{{ item.ad_id if item else '' }}" placeholder="не обязательно">
+        <datalist id="ads">{% for ad in ads %}<option value="{{ ad.ad_id }}">{{ ad.title }}</option>{% endfor %}</datalist>
+      </div>
+      <div>
+        <label>Ключевые слова в названии товара</label>
+        <input type="text" name="keywords" value="{{ item.keywords if item else '' }}" placeholder="iphone, airpods">
+        <div class="hint">Через запятую, регистр не важен.</div>
+      </div>
+      <div>
+        <label>Приоритет</label>
+        <input type="number" name="priority" value="{{ item.priority if item else 0 }}">
+      </div>
+    </div>
+    <label><input type="checkbox" name="enabled" value="1" {% if not item or item.enabled %}checked{% endif %}> Включён</label>
+    <p class="row"><button class="primary">Сохранить</button> <a class="btn" href="/templates">Отмена</a></p>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2 style="margin-top:0">Диалоги: кто и каким товаром интересуется</h2>
+  <table>
+    <tr><th>Обновлён</th><th>Аккаунт</th><th>Кто написал</th><th>Товар</th><th>Входящее сообщение</th><th>Наш автоответ</th></tr>
+    {% for c in items %}
+    <tr>
+      <td class="muted">{{ c.updated_at|dt }}</td>
+      <td>{{ c.account_name or c.account_id }}</td>
+      <td>{{ c.buyer_name or '—' }}</td>
+      <td>{{ c.ad_title or '—' }}{% if c.ad_id %}<div class="hint">ID {{ c.ad_id }}</div>{% endif %}</td>
+      <td><pre>{{ c.last_inbound_text[:300] }}</pre></td>
+      <td>
+        {% if c.reply_count %}
+        <pre class="muted">{{ c.last_reply_text[:300] }}</pre>
+        <div class="hint">{{ c.last_reply_at|dt }} · {{ c.template_name or '' }} · ответов: {{ c.reply_count }}</div>
+        {% else %}<span class="muted">не отвечали</span>{% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="muted">Пока пусто.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

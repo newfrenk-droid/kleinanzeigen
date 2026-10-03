@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+{% if not settings.vision_token or not settings.vision_folder_id %}
+<div class="card error">Не настроен Vision: укажите токен и ID папки в разделе <a href="/settings">«Настройки»</a>.</div>
+{% endif %}
+<div class="card">
+  <div class="row" style="justify-content:space-between">
+    <h2 style="margin:0">Аккаунты</h2>
+    <div class="row">
+      <form class="inline" method="post" action="/start-all"><button>▶ Запустить все</button></form>
+      <form class="inline" method="post" action="/stop-all"><button>■ Остановить все</button></form>
+      <a class="btn primary" href="/accounts/new">+ Добавить аккаунт</a>
+    </div>
+  </div>
+  <table style="margin-top:12px">
+    <tr><th>#</th><th>Название</th><th>Прокси</th><th>Профиль Vision</th><th>Объявлений</th><th>Статус</th><th></th></tr>
+    {% for a in accounts %}
+    <tr>
+      <td>{{ a.id }}</td>
+      <td><a href="/accounts/{{ a.id }}">{{ a.name }}</a>{% if not a.enabled %} <span class="muted">(выкл.)</span>{% endif %}</td>
+      <td class="muted">{{ a.proxy.split('@')[-1] if a.proxy else '—' }}</td>
+      <td class="muted">{{ a.vision_profile_id or 'создастся при запуске' }}</td>
+      <td>{{ a.ads_count }}</td>
+      <td>
+        <span class="st-{{ a.status }}">{{ STATUS_LABELS.get(a.status, a.status) }}</span>
+        {% if a.last_error %}<div class="hint">{{ a.last_error[:200] }}</div>{% endif %}
+      </td>
+      <td class="row">
+        {% if a.running %}
+        <form class="inline" method="post" action="/accounts/{{ a.id }}/stop"><button>■ Стоп</button></form>
+        {% else %}
+        <form class="inline" method="post" action="/accounts/{{ a.id }}/start"><button>▶ Старт</button></form>
+        {% endif %}
+        <a class="btn" href="/logs?account_id={{ a.id }}">Лог</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="muted">Аккаунтов пока нет — добавьте первый.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div class="row" style="justify-content:space-between">
+    <h2 style="margin:0">Шаблоны автоответа</h2>
+    <a class="btn primary" href="/templates/0">+ Новый шаблон</a>
+  </div>
+  <p class="hint">Для каждого диалога выбирается самый точный шаблон: сначала по конкретному объявлению, потом по ключевым словам в названии товара, потом общий. Шаблон аккаунта важнее шаблона «для всех»; при равенстве — выше приоритет.</p>
+  <table>
+    <tr><th>Название</th><th>Аккаунт</th><th>Условие</th><th>Приоритет</th><th>Текст</th><th></th></tr>
+    {% for t in items %}
+    <tr>
+      <td><a href="/templates/{{ t.id }}">{{ t.name }}</a>{% if not t.enabled %} <span class="muted">(выкл.)</span>{% endif %}</td>
+      <td>{{ accounts.get(t.account_id, 'все') if t.account_id else 'все' }}</td>
+      <td>{% if t.ad_id %}объявление {{ t.ad_id }}{% elif t.keywords %}слова: {{ t.keywords }}{% else %}<span class="muted">общий</span>{% endif %}</td>
+      <td>{{ t.priority }}</td>
+      <td><pre class="muted">{{ t.text[:160] }}{% if t.text|length > 160 %}…{% endif %}</pre></td>
+      <td><form class="inline" method="post" action="/templates/{{ t.id }}/delete" onsubmit="return confirm('Удалить шаблон?')"><button class="danger">✕</button></form></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
